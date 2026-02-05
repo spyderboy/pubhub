@@ -2,8 +2,8 @@
 
 # Project: PubHub Unified Publisher Stack
 # Script: setup.sh
-# Version: 0.2.0
-# Description: Automates Flutter, GCP V2, Netlify setup, Quality Gates, and SEO Middleware.
+# Version: 0.5.0
+# Description: Automates Flutter, GCP V2, SEO Full-Stack, Analytics, and Aider Protocols.
 
 # Colors for output
 CYAN='\033[0;36m'
@@ -11,7 +11,7 @@ GREEN='\033[0;32m'
 GRAY='\033[0;90m'
 NC='\033[0m' # No Color
 
-echo -e "${CYAN}🚀 Starting PubHub Ignition (Integrated Version)...${NC}"
+echo -e "${CYAN}🚀 Starting PubHub Ignition (Fully Reconciled)...${NC}"
 
 # 1. Create Directory Structure
 echo -e "${GRAY}📂 Creating directory structure...${NC}"
@@ -23,13 +23,12 @@ if [ ! -d "apps/flutter_app/web" ]; then
     cd apps/flutter_app && flutter create . --platforms web,android,ios && cd ../..
 fi
 
-# 3. SEO Surgery: Template index.html
-# Replaces static title with placeholders for the Cloud Function to swap.
+# 3. SEO Surgery: Template index.html (The Digital Jacket)
 INDEX_PATH="apps/flutter_app/web/index.html"
 if [ -f "$INDEX_PATH" ]; then
-    echo -e "${GRAY}🧬 Performing SEO Surgery on index.html...${NC}"
-    # Use sed to replace <title> and inject OG placeholders
-    sed -i '' 's|<title>.*</title>|<title>{{TITLE}}</title>\n    <meta name="description" content="{{DESC}}">\n    <meta property="og:title" content="{{TITLE}}">\n    <meta property="og:description" content="{{DESC}}">\n    <meta property="og:image" content="{{IMAGE_URL}}">|' "$INDEX_PATH"
+    echo -e "${GRAY}🧬 Injecting Full SEO Suite (OG, Twitter, Canonical) into index.html...${NC}"
+    # This sed command injects the full set of 2026-standard meta tags
+    sed -i '' 's|<title>.*</title>|<title>{{TITLE}}</title>\n    <link rel="canonical" href="{{CANONICAL_URL}}">\n    <meta name="description" content="{{DESC}}">\n    <meta property="og:type" content="article">\n    <meta property="og:title" content="{{TITLE}}">\n    <meta property="og:description" content="{{DESC}}">\n    <meta property="og:image" content="{{IMAGE_URL}}">\n    <meta name="twitter:card" content="summary_large_image">\n    <meta name="twitter:title" content="{{TITLE}}">\n    <meta name="twitter:description" content="{{DESC}}">\n    <meta name="twitter:image" content="{{IMAGE_URL}}">|' "$INDEX_PATH"
 fi
 
 # 4. Generate Files (Environment & Scaffolding)
@@ -38,10 +37,12 @@ cat <<EOF > .env.example
 # --- FRONTEND (Flutter) ---
 FLUTTER_APP_FIREBASE_API_KEY="your-api-key"
 FLUTTER_APP_FIREBASE_PROJECT_ID="your-project-id"
+GA_MEASUREMENT_ID="G-XXXXXXXXXX"
 
 # --- BACKEND (GCP Functions) ---
 # Set via: firebase functions:secrets:set RESEND_API_KEY
 RESEND_API_KEY="re_12345"
+GA_API_SECRET="your-ga4-secret"
 EOF
 
 echo -e "${GRAY}🔥 Setting up Firebase Baseline with SEO Routing...${NC}"
@@ -68,9 +69,12 @@ const path = require("path");
 
 exports.handleSEO = async (req, res) => {
     const fullPath = req.path;
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const canonicalUrl = \`\${protocol}://\${host}\${fullPath}\`;
+
     let indexTemplate;
     try {
-        // Looks for the file in the function's local dist folder (copied during build)
         indexTemplate = fs.readFileSync(path.join(__dirname, './dist/index.html'), 'utf-8');
     } catch (e) {
         return res.status(500).send("Build artifact index.html not found. Deploy Flutter app first.");
@@ -92,7 +96,8 @@ exports.handleSEO = async (req, res) => {
     const hydratedHtml = indexTemplate
         .replace(/{{TITLE}}/g, meta.title)
         .replace(/{{DESC}}/g, meta.desc)
-        .replace(/{{IMAGE_URL}}/g, meta.image);
+        .replace(/{{IMAGE_URL}}/g, meta.image)
+        .replace(/{{CANONICAL_URL}}/g, canonicalUrl);
 
     res.status(200).send(hydratedHtml);
 };
@@ -104,9 +109,14 @@ cat <<EOF > docs/aider_instructions.md
 # Aider Instructions: Unified Publisher Stack
 
 ## 🔍 SEO & Metadata Protocol
-1. **Frontend:** web/index.html uses {{TITLE}}, {{DESC}}, {{IMAGE_URL}} placeholders.
+1. **Frontend:** web/index.html uses {{TITLE}}, {{DESC}}, {{IMAGE_URL}}, {{CANONICAL_URL}} placeholders.
 2. **Backend:** Update backend/functions/seo_middleware.js for all dynamic routes.
-3. **Infrastructure:** Update firebase.json/netlify.toml rewrites for SEO routes.
+3. **Twitter:** Ensure IMAGE_URL is high-resolution for summary_large_image cards.
+
+## 📊 Analytics Protocol
+1. **Naming:** Use snake_case (e.g., article_engagement, newsletter_signup).
+2. **Frontend:** Use firebase_analytics for UI tracking.
+3. **Backend:** Use GA4 Measurement Protocol in GCP Functions for server-side events.
 
 ## 🛠️ Architecture
 - Flutter (WASM) for Frontend.
@@ -127,9 +137,11 @@ EOF
 echo "[]" > firestore.indexes.json
 
 if [ ! -d ".git" ]; then
+    echo -e "${GRAY}🔧 Initializing Git repository...${NC}"
     git init
 fi
 
+echo -e "${GRAY}🪝 Installing Git Hooks (Quality Gates)...${NC}"
 cat <<EOF > .git/hooks/pre-commit
 #!/bin/sh
 echo "Checking code quality before commit..."
@@ -143,8 +155,10 @@ echo "✅ Quality gates passed!"
 EOF
 chmod +x .git/hooks/pre-commit
 
+# 8. Final Instructions
 echo -e "\n${GREEN}✅ Ignition Complete!${NC}"
 echo "---------------------------------------------------"
 echo "Next Steps for Jose Antonio Licon:"
 echo "1. Run 'cd apps/flutter_app' and get coding."
 echo "2. Use Aider to expand your SEO Middleware Case logic."
+echo "3. Update .env with your GA4 Measurement ID."
