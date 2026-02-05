@@ -1,9 +1,9 @@
 # Project: PubHub Unified Publisher Stack
 # Script: setup.ps1
-# Version: 0.2.0
-# Description: Automates Flutter, GCP V2, Netlify setup, Quality Gates, and SEO Middleware.
+# Version: 0.5.0
+# Description: Automates Flutter, GCP V2, SEO Full-Stack, Analytics, and Aider Protocols for Windows.
 
-Write-Host "🚀 Starting PubHub Ignition (Integrated Windows Version)..." -ForegroundColor Cyan
+Write-Host "🚀 Starting PubHub Ignition v0.5.0 (Fully Reconciled Windows)..." -ForegroundColor Cyan
 
 # 1. Create Directory Structure
 Write-Host "📂 Creating directory structure..." -ForegroundColor Gray
@@ -27,19 +27,25 @@ if (!(Test-Path "apps/flutter_app/web")) {
     Set-Location "../../"
 }
 
-# 3. SEO Surgery: Template index.html
+# 3. SEO Surgery: Template index.html (The Digital Jacket)
 $indexPath = "apps/flutter_app/web/index.html"
 if (Test-Path $indexPath) {
-    Write-Host "🧬 Performing SEO Surgery on index.html..." -ForegroundColor Gray
+    Write-Host "🧬 Performing Full SEO Surgery on index.html..." -ForegroundColor Gray
     $content = Get-Content $indexPath -Raw
     
-    # Placeholder block for SEO
+    # Placeholder block for 2026 Social Standards
     $seoMeta = @"
 <title>{{TITLE}}</title>
+    <link rel="canonical" href="{{CANONICAL_URL}}">
     <meta name="description" content="{{DESC}}">
+    <meta property="og:type" content="article">
     <meta property="og:title" content="{{TITLE}}">
     <meta property="og:description" content="{{DESC}}">
     <meta property="og:image" content="{{IMAGE_URL}}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{TITLE}}">
+    <meta name="twitter:description" content="{{DESC}}">
+    <meta name="twitter:image" content="{{IMAGE_URL}}">
 "@
     # Replace static title with dynamic SEO block
     $content = $content -replace '<title>.*</title>', $seoMeta
@@ -52,10 +58,12 @@ $envExample = @"
 # --- FRONTEND (Flutter) ---
 FLUTTER_APP_FIREBASE_API_KEY="your-api-key"
 FLUTTER_APP_FIREBASE_PROJECT_ID="your-project-id"
+GA_MEASUREMENT_ID="G-XXXXXXXXXX"
 
 # --- BACKEND (GCP Functions) ---
 # Set via: firebase functions:secrets:set RESEND_API_KEY
 RESEND_API_KEY="re_12345"
+GA_API_SECRET="your-ga4-secret"
 "@
 $envExample | Out-File -FilePath ".env.example" -Encoding ascii
 
@@ -84,6 +92,10 @@ const path = require('path');
 
 exports.handleSEO = async (req, res) => {
     const fullPath = req.path;
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const canonicalUrl = \`\${protocol}://\${host}\${fullPath}\`;
+
     let indexTemplate;
     try {
         indexTemplate = fs.readFileSync(path.join(__dirname, './dist/index.html'), 'utf-8');
@@ -107,7 +119,8 @@ exports.handleSEO = async (req, res) => {
     const hydratedHtml = indexTemplate
         .replace(/{{TITLE}}/g, meta.title)
         .replace(/{{DESC}}/g, meta.desc)
-        .replace(/{{IMAGE_URL}}/g, meta.image);
+        .replace(/{{IMAGE_URL}}/g, meta.image)
+        .replace(/{{CANONICAL_URL}}/g, canonicalUrl);
 
     res.status(200).send(hydratedHtml);
 };
@@ -120,9 +133,13 @@ $aiderDocs = @"
 # Aider Instructions: Unified Publisher Stack
 
 ## 🔍 SEO & Metadata Protocol
-1. **Frontend:** web/index.html uses {{TITLE}}, {{DESC}}, {{IMAGE_URL}} placeholders.
-2. **Backend:** Update backend/functions/seo_middleware.js for new routes.
-3. **Infrastructure:** Update firebase.json/netlify.toml rewrites for SEO routes.
+1. **Frontend:** web/index.html uses {{TITLE}}, {{DESC}}, {{IMAGE_URL}}, {{CANONICAL_URL}} placeholders.
+2. **Backend:** Update backend/functions/seo_middleware.js for all dynamic routes.
+3. **Twitter:** Ensure IMAGE_URL is high-res for summary_large_image cards.
+
+## 📊 Analytics Protocol
+1. **Naming:** Use snake_case (e.g., article_engagement, newsletter_signup).
+2. **Implementation:** Use firebase_analytics for UI; GA4 Measurement Protocol for Backend events.
 
 ## 🛠️ Architecture
 - Flutter (WASM) for Frontend.
@@ -167,3 +184,4 @@ Write-Host "---------------------------------------------------"
 Write-Host "Next Steps for Jose Antonio Licon:"
 Write-Host "1. Run 'cd apps/flutter_app' and get coding."
 Write-Host "2. Use Aider to expand your SEO Middleware Case logic."
+Write-Host "3. Update .env with your GA4 Measurement ID."
