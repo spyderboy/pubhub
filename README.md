@@ -52,6 +52,11 @@ If you plan to publish to app stores, you must set up the native platform tools:
 Run the script for your OS to build the project architecture and install dependencies.
 * **Mac/Linux:** `chmod +x setup.sh && ./setup.sh`
 * **Windows:** `.\setup.ps1`
+* By default, Windows prevents scripts from running for security. If you get a red error message when running `.\setup.ps1`, you need to grant permission.
+1. Open **PowerShell** as **Administrator**.
+2. Run this command:
+   ```powershell
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ### 3. Account "Handshake"
 Link your local environment to your cloud providers:
