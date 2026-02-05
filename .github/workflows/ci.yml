@@ -1,0 +1,31 @@
+name: Baseline Quality Gate
+on: [push, pull_request]
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Flutter Quality ---
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - name: Flutter Lint & Test
+        run: |
+          cd apps/flutter_app
+          flutter pub get
+          flutter format --set-exit-if-changed .
+          flutter analyze
+          flutter test
+
+      # --- backend Quality ---
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Functions Lint & Test
+        run: |
+          cd backend/functions
+          npm install
+          npm run lint
+          npm test
