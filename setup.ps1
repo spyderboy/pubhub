@@ -1,15 +1,15 @@
 # Project: PubHub Unified Publisher Stack
 # Script: setup.ps1
-# Version: 0.1.0
-# Description: Automates Flutter, GCP V2, and Netlify environment setup with Quality Gates.
+# Version: 0.2.0
+# Description: Automates Flutter, GCP V2, Netlify setup, Quality Gates, and SEO Middleware.
 
-Write-Host "🚀 Starting PubHub Ignition (Windows Version)..." -ForegroundColor Cyan
+Write-Host "🚀 Starting PubHub Ignition (Integrated Windows Version)..." -ForegroundColor Cyan
 
 # 1. Create Directory Structure
 Write-Host "📂 Creating directory structure..." -ForegroundColor Gray
 $dirs = @(
     "apps/flutter_app",
-    "backend/functions",
+    "backend/functions/dist",
     "docs",
     "assets"
 )
@@ -19,7 +19,34 @@ foreach ($dir in $dirs) {
     }
 }
 
-# 2. Generate .env.example
+# 2. Initialize Flutter (if not exists)
+if (!(Test-Path "apps/flutter_app/web")) {
+    Write-Host "📦 Initializing Flutter Web app..." -ForegroundColor Gray
+    Set-Location "apps/flutter_app"
+    flutter create . --platforms web,android,ios
+    Set-Location "../../"
+}
+
+# 3. SEO Surgery: Template index.html
+$indexPath = "apps/flutter_app/web/index.html"
+if (Test-Path $indexPath) {
+    Write-Host "🧬 Performing SEO Surgery on index.html..." -ForegroundColor Gray
+    $content = Get-Content $indexPath -Raw
+    
+    # Placeholder block for SEO
+    $seoMeta = @"
+<title>{{TITLE}}</title>
+    <meta name="description" content="{{DESC}}">
+    <meta property="og:title" content="{{TITLE}}">
+    <meta property="og:description" content="{{DESC}}">
+    <meta property="og:image" content="{{IMAGE_URL}}">
+"@
+    # Replace static title with dynamic SEO block
+    $content = $content -replace '<title>.*</title>', $seoMeta
+    Set-Content -Path $indexPath -Value $content -Encoding UTF8
+}
+
+# 4. Generate Files (Environment & Scaffolding)
 Write-Host "📄 Generating .env.example..." -ForegroundColor Gray
 $envExample = @"
 # --- FRONTEND (Flutter) ---
@@ -32,19 +59,111 @@ RESEND_API_KEY="re_12345"
 "@
 $envExample | Out-File -FilePath ".env.example" -Encoding ascii
 
-# 3. Create Firebase Configuration Baseline
-Write-Host "🔥 Setting up Firebase Baseline..." -ForegroundColor Gray
+Write-Host "🔥 Setting up Firebase Baseline with SEO Routing..." -ForegroundColor Gray
 $firebaseJson = @"
 {
   "functions": { "source": "backend/functions", "codebase": "default" },
   "firestore": { "rules": "firestore.rules", "indexes": "firestore.indexes.json" },
-  "hosting": { "public": "apps/flutter_app/build/web", "rewrites": [{ "source": "**", "destination": "/index.html" }] }
+  "hosting": { 
+    "public": "apps/flutter_app/build/web", 
+    "rewrites": [
+      { "source": "/posts/**", "function": "seoMiddleware" },
+      { "source": "**", "destination": "/index.html" }
+    ] 
+  }
 }
 "@
 $firebaseJson | Out-File -FilePath "firebase.json" -Encoding ascii
 
-# 4. Set up Baseline Security Rules (Least Privilege)
+# 5. Generate SEO Middleware Logic
+Write-Host "🧩 Building SEO Middleware Microservice..." -ForegroundColor Gray
+$middlewareContent = @"
+const admin = require('firebase-admin');
+const fs = require('fs');
+const path = require('path');
+
+exports.handleSEO = async (req, res) => {
+    const fullPath = req.path;
+    let indexTemplate;
+    try {
+        indexTemplate = fs.readFileSync(path.join(__dirname, './dist/index.html'), 'utf-8');
+    } catch (e) {
+        return res.status(500).send('Build artifact index.html not found. Deploy Flutter app first.');
+    }
+
+    let meta = { title: 'PubHub', desc: 'Built with Unified Publisher Stack', image: '' };
+
+    if (fullPath.startsWith('/posts/')) {
+        const id = fullPath.split('/').pop();
+        const doc = await admin.firestore().collection('articles').doc(id).get();
+        if (doc.exists) {
+            const data = doc.data();
+            meta.title = data.title || meta.title;
+            meta.desc = data.summary || meta.desc;
+            meta.image = data.coverImage || meta.image;
+        }
+    }
+
+    const hydratedHtml = indexTemplate
+        .replace(/{{TITLE}}/g, meta.title)
+        .replace(/{{DESC}}/g, meta.desc)
+        .replace(/{{IMAGE_URL}}/g, meta.image);
+
+    res.status(200).send(hydratedHtml);
+};
+"@
+$middlewareContent | Out-File -FilePath "backend/functions/seo_middleware.js" -Encoding UTF8
+
+# 6. Generate Aider Instructions
+Write-Host "🤖 Writing AI Instruction Protocol..." -ForegroundColor Gray
+$aiderDocs = @"
+# Aider Instructions: Unified Publisher Stack
+
+## 🔍 SEO & Metadata Protocol
+1. **Frontend:** web/index.html uses {{TITLE}}, {{DESC}}, {{IMAGE_URL}} placeholders.
+2. **Backend:** Update backend/functions/seo_middleware.js for new routes.
+3. **Infrastructure:** Update firebase.json/netlify.toml rewrites for SEO routes.
+
+## 🛠️ Architecture
+- Flutter (WASM) for Frontend.
+- GCP V2 (Node.js) for Backend.
+- Resend for Emails.
+"@
+$aiderDocs | Out-File -FilePath "docs/aider_instructions.md" -Encoding UTF8
+
+# 7. Security Rules & Git Hooks
+Write-Host "🛡️ Setting up security rules..." -ForegroundColor Gray
 $rules = @"
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{
+  match /databases/{database}/documents {
+    match /{document=**} { allow read: if true; allow write: if request.auth != null; }
+  }
+}
+"@
+$rules | Out-File -FilePath "firestore.rules" -Encoding ascii
+"[]" | Out-File -FilePath "firestore.indexes.json" -Encoding ascii
+
+if (!(Test-Path ".git")) {
+    Write-Host "🔧 Initializing Git..." -ForegroundColor Gray
+    git init
+}
+
+$hookContent = @"
+#!/bin/sh
+echo "Checking code quality..."
+if [ -d "apps/flutter_app/lib" ]; then
+    cd apps/flutter_app
+    flutter format --set-exit-if-changed . || { echo '❌ Format failed'; exit 1; }
+    flutter analyze || { echo '❌ Analyze failed'; exit 1; }
+    cd ../..
+fi
+echo "✅ Quality gates passed!"
+"@
+$hookContent | Out-File -FilePath ".git/hooks/pre-commit" -Encoding ascii
+
+Write-Host "`n✅ Ignition Complete!" -ForegroundColor Green
+Write-Host "---------------------------------------------------"
+Write-Host "Next Steps for Jose Antonio Licon:"
+Write-Host "1. Run 'cd apps/flutter_app' and get coding."
+Write-Host "2. Use Aider to expand your SEO Middleware Case logic."
