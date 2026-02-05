@@ -82,6 +82,16 @@ Link your local environment to your cloud providers:
 
 ---
 
+## 🛡️ Security & Least-Privilege IAM
+
+This stack follows the **Principle of Least Privilege**. 
+
+1. **Firestore Rules:** By default, all data is locked. Public data (articles) is read-only.
+2. **GCP Service Accounts:** Your Functions run under a dedicated service account. 
+   - **Do not** use the "Owner" role for your API keys.
+   - **Action:** In the GCP Console, ensure the `App Engine default service account` only has the roles `Cloud Functions Developer` and `Secret Manager Secret Accessor`.
+3. **Secrets:** Never commit API keys. Use `firebase functions:secrets:set RESEND_API_KEY` to keep keys out of the codebase.
+
 ## 🌐 The Last Mile: Going Live
 
 1. **Build for Web:** `flutter build web --wasm`
