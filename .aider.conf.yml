@@ -1,0 +1,7 @@
+# .aider.conf.yml
+model: ollama/deepseek-coder-v2 # Or your preferred 2026 model
+edit-format: diff
+auto-test: true
+read:
+  - docs/aider_instructions.md
+  - docs/legal_templates.md
