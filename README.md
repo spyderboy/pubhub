@@ -2,7 +2,7 @@
 
 **A professional-grade media engine that automates infrastructure, providing a unified codebase for web and mobile that is ready for production on day one.**
 
-Most publishing projects stall out in the "plumbing" phase—configuring cloud permissions, databases, and deployment pipelines. This system eliminates that overhead. It builds a standardized, high-performance environment where your high-level intent—guided by AI—becomes functional, shippable software.
+This system reduces the friction and overhead of publishing on web and mobile and builds a standardized, high-performance environment where your high-level intent—guided by AI—becomes a functional, shippable product.
 
 ---
 
