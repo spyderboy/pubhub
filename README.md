@@ -42,3 +42,26 @@ setup.sh / setup.ps1: The "Ignition" scripts for Mac and Windows.
 docs/aider_instructions.md: The instruction manual for your AI assistant.
 
 backend/functions/: Pre-written GCP V2 Node.js templates.
+
+🔑 The Golden Keys: Required Accounts
+
+Before running the ignition scripts, ensure you have active accounts with the following providers. This project is designed to link these services into a single, automated ecosystem.
+
+| Account | Role in your Project | Purpose |
+| :--- | :--- | :--- |
+| **Google Cloud (GCP)** | **The Engine** | Powers your secure login (Auth), database (Firestore), and high-performance serverless logic (Functions V2). |
+| **Netlify** | **The Storefront** | Hosts your website on a global CDN and manages your custom domain and SSL certificates. |
+| **Resend** | **The Post Office** | Handles professional delivery of your newsletters and automated emails to your readers. |
+
+> **Note:** Most of these services offer generous free tiers. However, you will typically need a credit card on file for GCP and Netlify to verify your identity and enable "pay-as-you-go" scaling for when your publication grows.
+
+---
+
+🤝 The Account "Handshake"
+
+Once the scripts have built your local project structure, you will perform a one-time link to these services via your terminal:
+
+1. **Link Google:** Run `firebase login` to sync your local environment with your Google Cloud project.
+2. **Link Netlify:** Run `netlify login` to authorize your machine to publish directly to your web dashboard.
+3. **Secure Resend:** Copy your API Key from the [Resend Dashboard](https://resend.com) and run:
+   `firebase functions:secrets:set RESEND_API_KEY`
