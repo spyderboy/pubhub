@@ -65,3 +65,37 @@ Once the scripts have built your local project structure, you will perform a one
 2. **Link Netlify:** Run `netlify login` to authorize your machine to publish directly to your web dashboard.
 3. **Secure Resend:** Copy your API Key from the [Resend Dashboard](https://resend.com) and run:
    `firebase functions:secrets:set RESEND_API_KEY`
+
+## 🛠️ Troubleshooting the "Handshake"
+
+If you’ve run the scripts but things aren't "talking" to each other yet, don't panic. Here are the three most common friction points and how to fix them.
+
+### 1. "Command Not Found" (Path Issues)
+If you type `firebase` or `flutter` and see an error saying the command isn't recognized:
+* **The Fix:** Restart your terminal or VS Code. On Windows, you may need to restart your computer once after the first install to "refresh" the system's memory of where these tools live.
+* **Verification:** Type `flutter doctor` and `node -v`. If both return a version number, you are good to go.
+
+### 2. Permission Denied (Mac/Linux)
+If the `setup.sh` script refuses to run:
+* **The Fix:** You need to give the file "execution" permission. Run this command in your terminal:
+    `chmod +x setup.sh`
+* **Then:** Run it again with `./setup.sh`.
+
+### 3. Execution Policy (Windows)
+If the `setup.ps1` script is blocked by a red error message:
+* **The Fix:** Windows often blocks scripts downloaded from the internet for safety. Open PowerShell **as Administrator** and run this command:
+    `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+* **Then:** Type `Y` and try running `.\setup.ps1` again.
+
+### 4. The "Stuck" Firebase Login
+If `firebase login` opens a browser window but never seems to finish:
+* **The Fix:** Use the "CI" mode by running:
+    `firebase login:ci`
+* **Result:** This will give you a manual link to paste into your browser and a code to paste back into the terminal.
+
+---
+
+### 💡 Pro-Tip for 100% Success
+If you get stuck on a specific error message, **copy the entire error** and paste it into **Aider**. 
+
+> **Example:** *"Aider, I'm trying to run the setup script on Windows and I'm getting this error: [Paste Error]. How do I fix my environment?"* Because Aider has the context of our recipe, it will usually give you the exact command to fix your specific machine's configuration.
